@@ -18,7 +18,7 @@ class GestureController:
 
         frame_h, frame_w, _ = frame.shape
 
-        # 🔥 Create a smaller detection box (for better scaling)
+        # Create a smaller detection box (for better scaling)
         margin = 100
         x1 = margin
         y1 = margin
@@ -29,11 +29,11 @@ class GestureController:
         x = max(x1, min(index[0], x2))
         y = max(y1, min(index[1], y2))
 
-        # 🎯 Map to full screen
+        #  Map to full screen
         screen_x = (x - x1) * screen_w / (x2 - x1)
         screen_y = (y - y1) * screen_h / (y2 - y1)
 
-        # ⚡ Smooth movement
+        #  Smooth movement
         curr_x = self.prev_x + (screen_x - self.prev_x) / self.smoothening
         curr_y = self.prev_y + (screen_y - self.prev_y) / self.smoothening
 
@@ -41,12 +41,12 @@ class GestureController:
 
         self.prev_x, self.prev_y = curr_x, curr_y
 
-        # 🖱️ Left Click
+        #  Left Click
         if self.distance(index, thumb) < 30:
             pyautogui.click()
             return "LEFT_CLICK"
 
-        # 🖱️ Right Click
+        #  Right Click
         if self.distance(index, middle) < 30:
             pyautogui.rightClick()
             return "RIGHT_CLICK"
