@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Mouse</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(255,255,255,0.2);
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen flex items-center justify-center">
+
+    <!-- Background Canvas -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- Main Card -->
+    <div class="relative z-10 bg-white/95 backdrop-blur-md w-[900px] rounded-2xl shadow-2xl p-6 border border-gray-300">
+
+        <!-- Header -->
+        <div class="mb-6 border-b border-gray-300 pb-4">
+            <h1 class="text-2xl font-semibold text-gray-800">
+                Hand Gesture Virtual Mouse
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">
+                Control your system using real-time hand gestures
+            </p>
+        </div>
+
+        <!-- Video Section -->
+        <div class="flex justify-center relative">
+            <div class="border border-gray-400 rounded-xl overflow-hidden bg-black shadow-inner">
+                <img src="{{ url_for('video') }}" class="w-[700px]">
+            </div>
+            <!-- HUD Overlay -->
+            <div class="absolute inset-0 pointer-events-none">
+
+                <!-- Corner Brackets -->
+                <div class="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 border-gray-400"></div>
+                <div class="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 border-gray-400"></div>
+                <div class="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 border-gray-400"></div>
+                <div class="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 border-gray-400"></div>
+
+                <!-- Scan Line -->
+                <div class="scan-line"></div>
+
+                <!-- Status Text -->
+                <div class="absolute top-3 left-1/2 -translate-x-1/2 text-xs text-gray-400 tracking-widest">
+                    AI TRACKING ACTIVE
+                </div>
+
+                <!-- Bottom Info -->
+                <div class="absolute bottom-3 left-4 text-xs text-gray-400">
+                    STATUS: READY
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-6 grid grid-cols-2 gap-3 text-sm">
+            <div class="bg-gray-50 border border-gray-200 p-3 rounded-lg shadow-sm">
+                Move Cursor → <span class="font-medium">Index Finger</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 p-3 rounded-lg shadow-sm">
+                Left Click → <span class="font-medium">Thumb + Index</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 p-3 rounded-lg shadow-sm">
+                Right Click → <span class="font-medium">Index + Middle</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-200 p-3 rounded-lg shadow-sm">
+                Drag → <span class="font-medium">Fist</span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 text-xs text-gray-400 text-center">
+            Built with Flask, MediaPipe, OpenCV
+        </div>
+
+    </div>
+
+    <!-- Background Animation Script -->
+    <script>
+        const canvas = document.getElementById("bgCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const particleCount = 60;
+        const mouse = { x: null, y: null };
+
+        window.addEventListener("mousemove", (e) => {
+            mouse.x = e.x;
+            mouse.y = e.y;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = 2;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function connect() {
+            for (let a = 0; a < particles.length; a++) {
+                for (let b = a; b < particles.length; b++) {
+                    let dx = particles[a].x - particles[b].x;
+                    let dy = particles[a].y - particles[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 100) {
+                        ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(particles[b].x, particles[b].y);
+                        ctx.stroke();
+                    }
+
+                    // Mouse interaction
+                    let mx = particles[a].x - mouse.x;
+                    let my = particles[a].y - mouse.y;
+                    let mouseDist = Math.sqrt(mx * mx + my * my);
+
+                    if (mouseDist < 120) {
+                        ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                        ctx.beginPath();
+                        ctx.moveTo(particles[a].x, particles[a].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            connect();
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+
+</body>
+</html>
