@@ -97,6 +97,45 @@ A **Gradio-based version** can be deployed on Hugging Face for gesture visualiza
 
 ---
 
+## Download & Run (No Installation Required)
+
+> Don't want to set up Python or install dependencies? Just download and run the ready-to-use **Windows executable (`.exe`)** directly!
+
+### Download the Application
+
+| Platform | Link |
+|----------|------|
+| Windows (64-bit) | [**Download VirtualMouse.exe**](https://drive.google.com/file/d/1BSXhG573yXX0EnbiZhggybb6l796bNki/view) |
+
+### How to Run
+
+1. **Download** the `.exe` file from the link above.
+2. **Double-click** the downloaded `VirtualMouse.exe` to launch the application.
+3. When prompted, **allow webcam access** so the app can detect your hand gestures.
+4. Your cursor is now controlled by your hand! Use the gestures listed in the **Gesture Controls** table below.
+5. To **exit**, press `Q` on your keyboard or close the application window.
+
+### Windows SmartScreen Warning
+
+When you run the `.exe` for the first time, Windows may show a **"Windows protected your PC"** warning. This is normal for unsigned applications. To proceed:
+
+1. Click **"More info"**
+2. Click **"Run anyway"**
+
+The application is completely safe and open-source.
+
+### System Requirements
+
+| Requirement | Details |
+|-------------|---------|
+| **OS** | Windows 10 / 11 (64-bit) |
+| **Webcam** | Built-in or external USB webcam |
+| **RAM** | Minimum 4 GB recommended |
+| **Lighting** | Good ambient lighting for accurate gesture detection |
+| **Python** | ❌ Not required — everything is bundled in the `.exe` |
+
+---
+
 ##  Limitations
 
 * Requires good lighting conditions
